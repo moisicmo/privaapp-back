@@ -109,10 +109,13 @@ const validateUser = async (req = Request, res = Response) => {
         );
       }
     }
-    if (req.files) {
+    if (req.body.archivo != null) {
+      const fs = require('fs');
+
       //agregar ubicación de la imagen
-      const { tempFilePath } = req.files.archivo
-      const { secure_url } = await cloudinary.uploader.upload(tempFilePath, { folder: 'usersprivaap' });
+      const file = Buffer.from(req.body.archivo, 'base64');
+      fs.writeFileSync('/tmp/temp.jpg', file); // o /tmp/temp.png, dependiendo del formato
+      const { secure_url } = await cloudinary.uploader.upload('/tmp/temp.jpg', { folder: 'userscdd' });
       //modificamos y damos acceso al usuario
       user.avatar = secure_url;
     }
@@ -485,11 +488,15 @@ const updateImage = async (req = Request, res = Response) => {
 
       });
     }
+    const fs = require('fs');
+
     //agregar ubicación de la imagen
-    const { tempFilePath } = req.files.archivo
-    const { secure_url } = await cloudinary.uploader.upload(tempFilePath, { folder: 'usersprivaap' });
+    const file = Buffer.from(req.body.archivo, 'base64');
+    fs.writeFileSync('/tmp/temp.jpg', file); // o /tmp/temp.png, dependiendo del formato
+    const { secure_url } = await cloudinary.uploader.upload('/tmp/temp.jpg', { folder: 'userscdd' });
     //modificamos y damos acceso al usuario
     user.avatar = secure_url;
+
     await user.save();
     res.json({ msg: `Se cambio correctamente la imagen`, image: user.avatar });
 

@@ -1,5 +1,4 @@
 const { request, response } = require("express");
-const { Socket } = require('socket.io');
 const bcryptjs = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 const { customAlphabet } = require("nanoid");
@@ -47,7 +46,7 @@ const confirmGuest = async (req = Request, res = Response) => {
         const { uid } = jwt.verify(bearerToken, process.env.SECRETORPRIVATEKEY);
 
         const { code } = req.body;
-
+        console.log(code)
         const guest = await guestModel.findOne({
             where: { state: 1, code: code },
             attributes: {

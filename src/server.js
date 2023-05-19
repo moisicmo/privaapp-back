@@ -10,19 +10,18 @@ const { createServer } = require('http');
 
 const serviceAccount = require("./keys/privaap-2fce9-firebase-adminsdk-ci24s-b7b2200ba8.json");
 
-const { socketController } = require('./sockets/controller');
-
 class Server {
   constructor() {
     this.app = express();
     this.port = process.env.PORT;
     this.server = createServer(this.app);
-    this.io = require('socket.io')(this.server)
 
     this.userPath = "/api/users";
     this.groupPath = "/api/groups";
     this.guestPath = "/api/guests";
-    this.alertPath = "/api/alerts"
+    this.alertPath = "/api/alerts";
+
+    this.versionPath = "/api/version";
 
     //conectar a DB
     this.contectDB();
@@ -36,8 +35,6 @@ class Server {
     //Rutas de mi aplicación
     this.routes();
 
-    // Sockets
-    this.sockets();
   }
 
   async contectDB() {
@@ -55,18 +52,14 @@ class Server {
     });
   }
   middlewares() {
+    this.app.use(express.json({ limit: '50mb' }));
     //cors
     this.app.use(cors());
     //lectura y parseo del body
     this.app.use(express.json());
-    //carga de archivos
-    this.app.use(
-      fileUpload({
-        useTempFiles: true,
-        tempFileDir: "/tmp/",
-        createParentPath: true,
-      })
-    );
+    // Directorio Público
+    const publicPath = path.resolve(__dirname, './../public');
+    this.app.use(express.static(publicPath));
   }
 
   routes() {
@@ -74,9 +67,7 @@ class Server {
     this.app.use(this.groupPath, require("./routes/group.route"));
     this.app.use(this.guestPath, require("./routes/guest.route"));
     this.app.use(this.alertPath, require("./routes/alert.route"));
-  }
-  sockets() {
-    this.io.on('connection', (socket) => socketController(socket, this.io))
+    this.app.use(this.versionPath, require("./routes/version.route"));
   }
   listen() {
     this.server.listen(this.port, () => {

@@ -106,7 +106,7 @@ router.post(
   "/update/image",
   [
     validarJWT,
-    validarArchivoSubir,
+    // validarArchivoSubir,
   ],
   updateImage
 );
